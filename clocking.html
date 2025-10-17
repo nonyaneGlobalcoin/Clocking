@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clocking Machine - Working Hours Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #60a5fa;
+      text-align: center;
+    }
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 700px;
+      margin: 0 auto;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+    input {
+      background: #334155;
+      color: #fff;
+    }
+    button {
+      background: #3b82f6;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #475569;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #1e293b;
+    }
+    #summary {
+      margin-top: 20px;
+      text-align: right;
+      font-weight: bold;
+      color: #93c5fd;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Clocking Machine – Working Hours</h1>
+
+    <label>Clocking Number</label>
+    <input type="text" id="clockNo" placeholder="Enter clocking number">
+
+    <label>Name</label>
+    <input type="text" id="name" placeholder="Enter first name">
+
+    <label>Surname</label>
+    <input type="text" id="surname" placeholder="Enter surname">
+
+    <button onclick="fetchAttendance()">Fetch Attendance</button>
+
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Clock No</th>
+          <th>Name</th>
+          <th>Surname</th>
+          <th>Date</th>
+          <th>Clock In</th>
+          <th>Clock Out</th>
+          <th>Hours Worked</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody">
+        <tr><td colspan="7" style="text-align:center; color:#9ca3af;">No data yet</td></tr>
+      </tbody>
+    </table>
+
+    <div id="summary">Total Hours: 0</div>
+  </div>
+
+  <script>
+    // Calculate hours between two times
+    function calculateHours(clockIn, clockOut) {
+      const [inH, inM] = clockIn.split(":").map(Number);
+      const [outH, outM] = clockOut.split(":").map(Number);
+
+      let start = inH * 60 + inM;
+      let end = outH * 60 + outM;
+
+      // Handle overnight shifts (e.g. clocked out after midnight)
+      if (end < start) end += 24 * 60;
+
+      const diff = end - start;
+      return (diff / 60).toFixed(2); // hours to 2 decimal places
+    }
+
+    async function fetchAttendance() {
+      const clockNo = document.getElementById('clockNo').value.trim();
+      const name = document.getElementById('name').value.trim();
+      const surname = document.getElementById('surname').value.trim();
+
+      if (!clockNo || !name || !surname) {
+        alert("Please fill in clocking number, name, and surname.");
+        return;
+      }
+
+      // Mock data for the last 7 days — replace with real API data
+      const mockData = [
+        { date: "2025-10-11", clockIn: "08:15", clockOut: "17:05" },
+        { date: "2025-10-12", clockIn: "08:00", clockOut: "16:30" },
+        { date: "2025-10-13", clockIn: "07:55", clockOut: "17:20" },
+        { date: "2025-10-14", clockIn: "08:10", clockOut: "16:40" },
+        { date: "2025-10-15", clockIn: "08:00", clockOut: "17:00" },
+        { date: "2025-10-16", clockIn: "07:50", clockOut: "16:20" },
+        { date: "2025-10-17", clockIn: "08:05", clockOut: "16:35" }
+      ];
+
+      // Process and display
+      const tbody = document.getElementById('resultsBody');
+      tbody.innerHTML = "";
+      let total = 0;
+
+      mockData.forEach(item => {
+        const hours = parseFloat(calculateHours(item.clockIn, item.clockOut));
+        total += hours;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${clockNo}</td>
+          <td>${name}</td>
+          <td>${surname}</td>
+          <td>${item.date}</td>
+          <td>${item.clockIn}</td>
+          <td>${item.clockOut}</td>
+          <td>${hours.toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('summary').textContent = "Total Hours: " + total.toFixed(2);
+    }
+  </script>
+</body>
+</html>
